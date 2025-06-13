@@ -1,0 +1,112 @@
+create database Hotel_management_systeem;
+
+
+use Hotel_management_systeem;
+
+
+-- HOTEL
+CREATE TABLE Hotel (
+    hotel_code INT PRIMARY KEY,
+    name VARCHAR(255),
+    city VARCHAR(100),
+    manager_id INT, -- Manager is an employee, FK to Employee
+    num_rooms INT,
+    star_rating INT
+);
+
+-- EMPLOYEE
+CREATE TABLE Employee (
+    employee_id INT PRIMARY KEY,
+    name VARCHAR(255),
+    role VARCHAR(100),
+    hotel_code INT,
+    shift_details VARCHAR(100),
+    FOREIGN KEY (hotel_code) REFERENCES Hotel(hotel_code)
+);
+
+-- Link manager_id to an employee after both tables are created
+ALTER TABLE Hotel
+ADD CONSTRAINT fk_manager
+FOREIGN KEY (manager_id) REFERENCES Employee(employee_id);
+
+-- ROOM
+CREATE TABLE Room (
+    room_number INT,
+    hotel_code INT,
+    type VARCHAR(100),
+    price_per_night DECIMAL(10, 2),
+    availability_status VARCHAR(20),
+    PRIMARY KEY (room_number, hotel_code),
+    FOREIGN KEY (hotel_code) REFERENCES Hotel(hotel_code)
+);
+
+-- GUEST
+CREATE TABLE Guest (
+    guest_id INT PRIMARY KEY,
+    name VARCHAR(255),
+    loyalty_level VARCHAR(50)
+);
+
+-- BOOKING
+CREATE TABLE Booking (
+    booking_id INT PRIMARY KEY,
+    guest_id INT,
+    hotel_code INT,
+    room_number INT,
+    check_in_date DATE,
+    check_out_date DATE,
+    total_bill DECIMAL(10, 2),
+    FOREIGN KEY (guest_id) REFERENCES Guest(guest_id),
+    FOREIGN KEY (hotel_code, room_number) REFERENCES Room(hotel_code, room_number)
+);
+
+-- FEEDBACK
+CREATE TABLE Feedback (
+    feedback_id INT PRIMARY KEY,
+    booking_id INT UNIQUE, -- One feedback per booking
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comments TEXT,
+    FOREIGN KEY (booking_id) REFERENCES Booking(booking_id)
+);
+
+
+INSERT INTO Hotel (hotel_code, name, city, manager_id, num_rooms, star_rating) VALUES
+(1, 'Grand Plaza', 'Mumbai', 101, 100, 5),
+(2, 'Ocean View', 'Chennai', 102, 80, 4),
+(3, 'Skyline Suites', 'Delhi', 103, 120, 5);
+
+
+INSERT INTO Employee (employee_id, name, role, hotel_code, shift_details) VALUES
+(101, 'Rajesh Sharma', 'Manager', 1, 'Day Shift'),
+(102, 'Anita Iyer', 'Manager', 2, 'Day Shift'),
+(103, 'Vikram Singh', 'Manager', 3, 'Day Shift'),
+(104, 'Meena Kaur', 'Receptionist', 1, 'Night Shift'),
+(105, 'John Doe', 'Housekeeping', 1, 'Day Shift'),
+(106, 'Priya Nair', 'Receptionist', 2, 'Night Shift'),
+(107, 'Ravi Kumar', 'Housekeeping', 3, 'Evening Shift');
+
+
+INSERT INTO Room (room_number, hotel_code, type, price_per_night, availability_status) VALUES
+(101, 1, 'Deluxe', 4500.00, 'Available'),
+(102, 1, 'Suite', 7000.00, 'Booked'),
+(201, 2, 'Standard', 3000.00, 'Available'),
+(202, 2, 'Deluxe', 4000.00, 'Booked'),
+(301, 3, 'Suite', 8000.00, 'Available');
+
+
+INSERT INTO Guest (guest_id, name, loyalty_level) VALUES
+(201, 'Kiran Rao', 'Silver'),
+(202, 'Deepika Mehta', 'Gold'),
+(203, 'Arjun Verma', 'Platinum');
+
+
+INSERT INTO Booking (booking_id, guest_id, hotel_code, room_number, check_in_date, check_out_date, total_bill) VALUES
+(1001, 201, 1, 102, '2025-06-01', '2025-06-05', 28000.00),
+(1002, 202, 2, 202, '2025-06-02', '2025-06-04', 8000.00),
+(1003, 203, 3, 301, '2025-06-10', '2025-06-12', 16000.00);
+
+
+INSERT INTO Feedback (feedback_id, booking_id, rating, comments) VALUES
+(1, 1001, 4, 'Very good service, clean rooms.'),
+(2, 1002, 5, 'Excellent experience and food.'),
+(3, 1003, 3, 'Good stay but room service was slow.');
